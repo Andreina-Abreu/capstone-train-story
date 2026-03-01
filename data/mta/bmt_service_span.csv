@@ -1,0 +1,15 @@
+day_type,route_short_name,first_dep_sec,last_dep_sec,n_trips,first_departure,last_departure
+Weekday,J,510,89700,285,00:08,24:55
+Weekday,L,390,88920,554,00:06,24:42
+Weekday,N,630,92220,285,00:10,25:37
+Weekday,Q,780,91260,315,00:13,25:21
+Weekday,R,900,89160,303,00:15,24:46
+Weekday,S,0,85770,238,00:00,23:49
+Weekday,W,22380,80040,187,06:13,22:14
+Weekday,Z,26400,63960,12,07:20,17:46
+Weekend,J,510,89730,492,00:08,24:55
+Weekend,L,390,88920,944,00:06,24:42
+Weekend,N,630,92220,432,00:10,25:37
+Weekend,Q,780,91260,544,00:13,25:21
+Weekend,R,900,89160,432,00:15,24:46
+Weekend,S,0,85770,476,00:00,23:49

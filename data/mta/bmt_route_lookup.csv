@@ -1,0 +1,9 @@
+route_id,route_short_name,route_long_name,is_franklin
+J,J,Nassau St Local,FALSE
+Z,Z,Nassau St Express,FALSE
+L,L,14 St-Canarsie Local,FALSE
+N,N,Broadway Local,FALSE
+Q,Q,Broadway Express,FALSE
+R,R,Broadway Local,FALSE
+W,W,Broadway Local,FALSE
+FS,S,Franklin Avenue Shuttle,TRUE

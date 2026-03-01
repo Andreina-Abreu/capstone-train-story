@@ -1,0 +1,39 @@
+---
+title: "Data & Methods"
+format:
+  html:
+    toc: false
+---
+
+This project compares two of the world's busiest urban rail systems — the MTA's Brooklyn-Manhattan Transit (BMT) group and JR East's Yamanote Line — across four dimensions: network structure, passenger demand, service frequency, and reliability.
+
+## Data Sources
+
+### MTA (New York City)
+
+MTA data is publicly available through the [MTA Open Data Portal](https://www.mta.info/open-data) and covers 2024–2025.
+
+-   **GTFS** — static schedule files (routes, trips, stop times, shapes) used to map the BMT network and compute scheduled trip frequency
+-   **Hourly ridership** — average riders by hour of day, segmented by weekday and weekend
+-   **On-time performance (OTP)** — monthly terminal OTP by day type, used as the primary reliability metric
+
+### JR East (Tokyo)
+
+JR East data is more limited in public granularity than MTA. Three sources were combined:
+
+-   **GTFS via ODPT** — Open Data Platform for Public Transportation, used for the Yamanote schedule, stop locations, and headway computation
+-   **Passenger survey (JSON)** — annual station-level boarding counts published via ODPT
+-   **Annual station boardings** — daily average boardings per station published at [jreast.co.jp](https://www.jreast.co.jp/en/company/data/passenger/), covering FY2023 and FY2024
+
+## Key Limitations
+
+-   **No hourly ridership for Yamanote.** JR East does not publish intraday ridership publicly. Frequency charts use scheduled departures as a supply-side proxy.
+-   **Different reliability definitions.** MTA measures on-time performance at the terminal. Japan's standard measures departure to within seconds of schedule — these are not directly comparable metrics.
+-   **Boarding counts only.** JR East station data counts boardings (entries) only. MTA turnstile data counts both entries and exits separately.
+-   **Headways computed from scheduled GTFS**, not observed operations. Actual headway variance during disruptions is not captured.
+
+## Tools
+
+Analysis and visualization were built entirely in R using `tidyverse`, `plotly`, `leaflet`, `scales`, and `sf`. The site is built with [Quarto](https://quarto.org).
+
+For the complete methodology, analytical decisions, and limitations discussion, see the full white paper.

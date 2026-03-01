@@ -1,0 +1,8 @@
+"0","p <- ggplot(y_headways, aes(headway_min)) +"
+"0","  geom_histogram(bins = 40) +"
+"0","  labs("
+"0","    title = paste0(""Yamanote (scheduled) — headways at "", unique(y_headways$ref_stop)),"
+"0","    x = ""Headway (minutes)"", y = ""Count"""
+"0","  )"
+"0",""
+"0","ggplotly(p)"

@@ -1,0 +1,910 @@
+---
+title: "Ride the Line"
+subtitle: "NYC Subway vs Tokyo's Yamanote — Same problem, different toolkits"
+engine: knitr
+execute:
+  echo: false
+  message: false
+  warning: false
+format:
+  html:
+    toc: true
+    toc-location: right
+---
+
+## Welcome Aboard
+
+Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA's Brooklyn-Manhattan Transit group and JR East's Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.
+
+But how they solve that problem — and how much they're willing to show you about how they're doing it — turns out to be very different.
+
+::: {.callout-note appearance="minimal"}
+*How do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?*
+:::
+
+------------------------------------------------------------------------
+
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(plotly)
+library(scales)
+library(jsonlite)
+library(stringr)
+
+df <- readr::read_csv("data/mta/bmt_hour_profile.csv", show_col_types = FALSE)
+
+mta_blue   <- "#0039A6"
+mta_orange <- "#FF6319"
+fmtN <- function(v) scales::label_number(accuracy = 1, big.mark = ",")(v)
+
+#Yamanote line
+
+y_hourly   <- readr::read_csv("data/processed/jreast/yamanote_hourly_departures.csv", show_col_types = FALSE)
+y_headways <- readr::read_csv("data/processed/jreast/yamanote_headways.csv", show_col_types = FALSE)
+y_span     <- readr::read_csv("data/processed/jreast/yamanote_service_span.csv", show_col_types = FALSE)
+y_stops    <- readr::read_csv("data/processed/jreast/yamanote_stops.csv", show_col_types = FALSE)
+
+week_file <- "data/processed/jreast/yamanote_weekday_weekend_profile.csv"
+y_week <- if (file.exists(week_file)) readr::read_csv(week_file, show_col_types = FALSE) else NULL
+
+ps_file <- "data/jreast/passenger_survey.json"   # <-- change if your file name differs
+stopifnot(file.exists(ps_file))
+
+ps <- fromJSON(ps_file)
+
+ps_y <- as_tibble(ps) %>%
+  filter(map_lgl(`odpt:railway`, ~ "odpt.Railway:JR-East.Yamanote" %in% .x)) %>%
+  select(
+    station_id = `owl:sameAs`,
+    survey = `odpt:passengerSurveyObject`
+  )
+
+ps_y_long <- ps_y %>%
+  mutate(survey = map(survey, ~ as_tibble(.x))) %>%
+  unnest(survey) %>%
+  transmute(
+    station_id,
+    surveyYear = `odpt:surveyYear`,
+    passengerJourneys = `odpt:passengerJourneys`
+  )
+```
+
+
+## Stop 1 — The Networks
+
+Before comparing numbers, it helps to see what we're actually comparing. The BMT is a web: eight lines branching across Brooklyn, Manhattan, and Queens, sharing tracks, splitting at junctions, and serving dozens of distinct neighborhoods. The Yamanote is a loop: one line, 29 stations, running clockwise and counterclockwise around central Tokyo without a beginning or an end.
+
+That structural difference matters. A loop has no terminal bottlenecks, no branching complexity, and no direction — a delay anywhere propagates around the whole circuit equally. The BMT's branching structure creates flexibility but also fragility: a problem on one trunk can cascade across multiple lines.
+
+::: {.callout-tip appearance="minimal" icon="false"}
+-   **Scale:** The BMT spans roughly 80 miles of track across three boroughs. The Yamanote covers just 21 miles — but within that loop sits some of the most valuable urban land on earth, and 26 of its 29 stations rank among JR East's 100 busiest.
+-   **Structure:** BMT = branching network, shared trunks, multiple termini. Yamanote = closed loop, single service, no branches.
+:::
+
+## MTA Brooklyn-Manhattan Transit (BMT) Map
+
+```{r bmt_leaflet_static_map}
+library(readr)
+library(leaflet)
+library(sf)
+
+gtfs_dir <- "data/mta"
+
+routes     <- read_csv(file.path(gtfs_dir, "routes.txt"), show_col_types = FALSE)
+trips      <- read_csv(file.path(gtfs_dir, "trips.txt"), show_col_types = FALSE)
+shapes     <- read_csv(file.path(gtfs_dir, "shapes.txt"), show_col_types = FALSE)
+stops      <- read_csv(file.path(gtfs_dir, "stops.txt"), show_col_types = FALSE)
+stop_times <- read_csv(file.path(gtfs_dir, "stop_times.txt"), show_col_types = FALSE)
+
+bmt_short <- c("J","Z","L","M","N","Q","R","W")
+
+route_hex <- c(
+  J="#996633", Z="#996633",
+  L="#A7A9AC",
+  M="#FF6319",
+  N="#FCCC0A", Q="#FCCC0A", R="#FCCC0A", W="#FCCC0A"
+)
+
+bmt_routes <- routes %>%
+  filter(route_short_name %in% bmt_short) %>%
+  select(route_id, route_short_name)
+
+shape_choice <- trips %>%
+  inner_join(bmt_routes, by = "route_id") %>%
+  filter(!is.na(shape_id)) %>%
+  count(route_short_name, shape_id, name = "n_trips") %>%
+  group_by(route_short_name) %>%
+  slice_max(n_trips, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(route_short_name, shape_id)
+
+bmt_shapes <- shapes %>%
+  inner_join(shape_choice, by = "shape_id") %>%
+  arrange(route_short_name, shape_id, shape_pt_sequence)
+
+route_trips <- trips %>%
+  inner_join(bmt_routes, by = "route_id") %>%
+  select(trip_id, route_short_name)
+
+bmt_route_stops <- stop_times %>%
+  inner_join(route_trips, by = "trip_id") %>%
+  distinct(route_short_name, stop_id) %>%
+  inner_join(stops %>% select(stop_id, stop_name, stop_lat, stop_lon), by = "stop_id") %>%
+  filter(!is.na(stop_lat), !is.na(stop_lon))
+
+THRESH_M <- 80
+
+route_lines_sf <- bmt_shapes %>%
+  st_as_sf(coords = c("shape_pt_lon", "shape_pt_lat"), crs = 4326, remove = FALSE) %>%
+  st_transform(3857) %>%
+  group_by(route_short_name, shape_id) %>%
+  summarise(geometry = st_cast(st_combine(geometry), "LINESTRING"), .groups = "drop") %>%
+  group_by(route_short_name) %>%
+  summarise(geometry = st_union(geometry), .groups = "drop")
+
+route_lines_tbl <- tibble(
+  route_short_name = route_lines_sf$route_short_name,
+  route_geom = st_geometry(route_lines_sf)  # sfc list-column (NOT sf)
+)
+
+stops_flagged <- bmt_route_stops %>%
+  st_as_sf(coords = c("stop_lon", "stop_lat"), crs = 4326, remove = FALSE) %>%
+  st_transform(3857) %>%
+  left_join(route_lines_tbl, by = "route_short_name") %>%
+  mutate(
+    dist_m = as.numeric(st_distance(st_geometry(.), route_geom, by_element = TRUE)),
+    tooltip = if_else(!is.na(dist_m) & dist_m > THRESH_M,
+                      paste0(stop_name, " (limited/alternate service)"),
+                      stop_name)
+  ) %>%
+  st_drop_geometry()
+
+init_lon  <- mean(range(bmt_shapes$shape_pt_lon, na.rm = TRUE))
+init_lat  <- mean(range(bmt_shapes$shape_pt_lat, na.rm = TRUE))
+init_zoom <- 11
+
+m <- leaflet(options = leafletOptions(
+  zoomControl = FALSE,
+  dragging = FALSE,
+  scrollWheelZoom = FALSE,
+  doubleClickZoom = FALSE,
+  touchZoom = FALSE,
+  boxZoom = FALSE,
+  keyboard = FALSE
+)) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lng = init_lon, lat = init_lat, zoom = init_zoom)
+
+for (r in bmt_short) {
+  m <- m %>%
+    addPolylines(
+      data = filter(bmt_shapes, route_short_name == r),
+      lng = ~shape_pt_lon, lat = ~shape_pt_lat,
+      group = r,
+      color = route_hex[[r]],
+      weight = 5, opacity = 0.9
+    ) %>%
+    addCircleMarkers(
+      data = filter(stops_flagged, route_short_name == r),
+      lng = ~stop_lon, lat = ~stop_lat,
+      group = r,
+      radius = 3.5,
+      stroke = TRUE, color = "white", weight = 1,
+      fillColor = route_hex[[r]], fillOpacity = 0.95,
+      label = ~tooltip
+    )
+}
+
+m %>%
+  addLayersControl(
+    overlayGroups = bmt_short,
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
+
+## JR East Yamanote Line Map
+
+```{r yamanote_leaflet}
+library(readr)
+library(leaflet)
+
+gtfs_path <- "data/jreast"
+LIME <- "#32CD32"
+
+routes     <- read_csv(file.path(gtfs_path, "routes.txt"), show_col_types = FALSE)
+trips      <- read_csv(file.path(gtfs_path, "trips.txt"), show_col_types = FALSE)
+stop_times <- read_csv(file.path(gtfs_path, "stop_times.txt"), show_col_types = FALSE)
+stops      <- read_csv(file.path(gtfs_path, "stops.txt"), show_col_types = FALSE)
+
+station_info <- fromJSON(file.path(gtfs_path, "jre_station_info.json"), flatten = TRUE)
+
+station_name_map <- station_info %>%
+  transmute(
+    stop_name_ja = `odpt:stationTitle.ja`,
+    stop_name_en = `odpt:stationTitle.en`
+  ) %>%
+  filter(!is.na(stop_name_ja), !is.na(stop_name_en)) %>%
+  distinct(stop_name_ja, .keep_all = TRUE)
+
+stops <- stops %>%
+  left_join(station_name_map, by = c("stop_name" = "stop_name_ja")) %>%
+  mutate(stop_name_display = coalesce(stop_name_en, stop_name))
+
+route_desc_safe <- if ("route_desc" %in% names(routes)) routes$route_desc else ""
+y_routes <- routes %>%
+  mutate(search_text = str_to_lower(paste(route_short_name, route_long_name, route_desc_safe))) %>%
+  filter(str_detect(search_text, "yamanote|山手|\\bjy\\b"))
+
+stopifnot(nrow(y_routes) > 0)
+
+y_trips <- trips %>% semi_join(y_routes, by = "route_id")
+
+y_trip <- y_trips %>%
+  distinct(trip_id) %>%
+  inner_join(stop_times %>% count(trip_id, name = "n_stops"), by = "trip_id") %>%
+  arrange(desc(n_stops)) %>%
+  slice(1) %>%
+  pull(trip_id)
+
+stopifnot(length(y_trip) == 1)
+
+y_path <- stop_times %>%
+  filter(trip_id == y_trip) %>%
+  arrange(stop_sequence) %>%
+  left_join(stops %>% select(stop_id, stop_lat, stop_lon, stop_name_display), by = "stop_id") %>%
+  filter(!is.na(stop_lat), !is.na(stop_lon)) %>%
+  distinct(stop_id, .keep_all = TRUE)
+
+y_path_closed <- bind_rows(y_path, y_path[1, ])
+
+center_lon <- mean(range(y_path$stop_lon, na.rm = TRUE))
+center_lat <- mean(range(y_path$stop_lat, na.rm = TRUE))
+
+leaflet(
+  y_path_closed,
+  options = leafletOptions(
+    zoomControl = FALSE,
+    dragging = FALSE,
+    scrollWheelZoom = FALSE,
+    doubleClickZoom = FALSE,
+    touchZoom = FALSE,
+    boxZoom = FALSE,
+    keyboard = FALSE
+  )
+) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lng = center_lon, lat = center_lat, zoom = 12) %>%
+  addPolylines(
+    lng = ~stop_lon, lat = ~stop_lat,
+    color = LIME, weight = 5, opacity = 0.9
+  ) %>%
+  addCircleMarkers(
+    lng = ~stop_lon, lat = ~stop_lat,
+    radius = 6,
+    stroke = TRUE, color = "white", weight = 2,
+    fillColor = LIME, fillOpacity = 0.95,
+    label = ~stop_name_display
+  )
+```
+
+------------------------------------------------------------------------
+
+## Stop 2 — Demand
+
+New York and Tokyo approach peak demand differently — and the data tells that story clearly, even accounting for what Tokyo doesn't share publicly.
+
+On the BMT, weekday demand builds sharply into the morning rush and collapses just as sharply in the off-peak. The gap between 8am on a weekday and a Sunday afternoon is enormous. Weekends show a flatter, later-peaking curve — riders shifting from commuters to leisure travelers.
+
+For the Yamanote, JR East publishes annual daily average boardings per station rather than hourly ridership. What that data shows is striking in its own way: Shinjuku alone handles over 666,000 daily boardings. The top 12 stations on the loop collectively move more people per day than many entire transit systems — and every single station grew year-over-year from FY2023 to FY2024, continuing Tokyo's post-COVID recovery.
+
+::: {.callout-tip appearance="minimal" icon="false"}
+-   **Peak timing:** BMT peaks sharply at 8am and 5pm on weekdays. Yamanote demand is spread more evenly across the day — the loop design means there's no single choke point that concentrates demand.
+-   **Weekend shift:** BMT weekend ridership drops significantly and peaks later (\~noon). Yamanote's mix of commuters, tourists, and leisure riders means weekends remain high volume at major hubs like Shibuya and Shinjuku.
+-   **Data gap:** NYC provides hourly ridership; Tokyo provides annual station totals. The Yamanote frequency charts below use *scheduled departures* as a supply-side proxy — the best available measure given what JR East publishes publicly.
+:::
+
+```{r stop2_peak}
+
+peak_hours <- c(8, 17)
+
+y_top <- max(df$p90, na.rm = TRUE) * 1.02
+
+p <- ggplot(df, aes(hour, avg_riders, color = day_type, fill = day_type)) +
+  geom_ribbon(aes(ymin = p10, ymax = p90), alpha = 0.18, color = NA) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2.4) +
+  geom_vline(xintercept = peak_hours, linewidth = 0.9, linetype = "dashed", color = mta_blue) +
+  geom_text(
+    data = tibble(hour = peak_hours),
+    aes(x = hour, y = y_top, label = "Rush hour"),
+    inherit.aes = FALSE, color = mta_blue, fontface = "bold", vjust = 0, size = 3.6
+  ) +
+  scale_x_continuous(breaks = 0:23) +
+  scale_y_continuous(
+    labels = label_number(scale = 1e-3, suffix = "K"),
+    expand = expansion(mult = c(0, 0.10))
+  ) +
+  scale_color_manual(values = c(Weekday = mta_blue, Weekend = mta_orange)) +
+  scale_fill_manual(values  = c(Weekday = mta_blue, Weekend = mta_orange)) +
+  labs(
+    title = "BMT Rush Hour 2025 (average riders by hour)",
+    x = "Hour of day",
+    y = "Average riders",
+    color = NULL, fill = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(face = "bold"),
+    axis.line = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks = element_line(color = "gray30"),
+    legend.position = "right"
+  )
+
+g <- ggplotly(p, tooltip = c("x", "y", "color")) %>%
+  layout(
+    legend = list(orientation = "v", x = 1.02, y = 0.5, xanchor = "left", yanchor = "middle"),
+    margin = list(r = 140),
+    hovermode = "closest"
+  )
+
+for (i in seq_along(g$x$data)) {
+  g$x$data[[i]]$hoverinfo <- "skip"
+  g$x$data[[i]]$hovertemplate <- NULL
+}
+
+for (i in seq_along(g$x$data)) {
+  tr <- g$x$data[[i]]
+  if (!is.null(tr$mode) && grepl("markers", tr$mode) &&
+      !is.null(tr$name) && tr$name %in% c("Weekday","Weekend")) {
+    tr$text <- paste0("Hour of Day: ", tr$x, "<br>Average Riders: ", fmtN(tr$y))
+    tr$hoverinfo <- "text"
+    tr$hovertemplate <- "%{text}<extra></extra>"
+    g$x$data[[i]] <- tr
+  }
+}
+
+add_band_hover <- function(g, d, which = c("p10","p90"), label) {
+  ycol <- which[1]
+  g %>% add_trace(
+    data = d,
+    x = ~hour, y = as.formula(paste0("~", ycol)),
+    type = "scatter", mode = "markers",
+    marker = list(opacity = 0, size = 12),
+    inherit = FALSE, showlegend = FALSE,
+    hovertemplate = ~paste0(
+      "Hour of Day: ", hour,
+      "<br>", label, ": ", fmtN(.data[[ycol]]),
+      "<extra></extra>"
+    )
+  )
+}
+
+for (dt in c("Weekday","Weekend")) {
+  dsub <- df %>% filter(day_type == dt) %>% arrange(hour)
+  g <- add_band_hover(g, dsub, which = "p10", label = "Low Band (10th%)")
+  g <- add_band_hover(g, dsub, which = "p90", label = "High Band (90th%)")
+}
+
+shown <- character(0)
+for (i in seq_along(g$x$data)) {
+  nm <- trimws(ifelse(is.null(g$x$data[[i]]$name), "", g$x$data[[i]]$name))
+  g$x$data[[i]]$showlegend <- FALSE
+  if (nm %in% c("Weekday","Weekend") && !(nm %in% shown)) {
+    g$x$data[[i]]$showlegend <- TRUE
+    shown <- c(shown, nm)
+  }
+}
+
+g %>% config(displayModeBar = FALSE)
+```
+
+## Yamanote Station Demand
+
+::: panel-tabset
+### Station Ranking
+
+```{r demand_ranking}
+GREEN  <- "#0CA10E"
+YELLOW <- "#FCCC0A"
+
+y_ridership <- read_csv("data/processed/jreast/yamanote_station_ridership.csv",
+                        show_col_types = FALSE)
+
+p1 <- y_ridership %>%
+  filter(!is.na(fy2024_total)) %>%
+  mutate(station_en = reorder(station_en, fy2024_total)) %>%
+  ggplot(aes(x = station_en, y = fy2024_total,
+             text = paste0(station_en, " (", station_ja, ")",
+                           "<br>Daily avg boardings: ",
+                           scales::label_number(big.mark = ",")(fy2024_total)))) +
+  geom_col(fill = GREEN, alpha = 0.85) +
+  coord_flip() +
+  scale_y_continuous(labels = label_number(scale = 1e-3, suffix = "K")) +
+  labs(
+    title = "Yamanote Line — Station daily boardings (FY2024)",
+    subtitle = "Source: JR East official data • Boardings only (not entries + exits)",
+    x = NULL, y = "Daily average boardings"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor   = element_blank(),
+    axis.line.x  = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks.x = element_line(color = "gray30"),
+    plot.title   = element_text(face = "bold")
+  )
+
+ggplotly(p1, tooltip = "text") %>%
+  layout(hovermode = "closest") %>%
+  config(displayModeBar = FALSE)
+```
+
+### FY2023 vs FY2024
+
+```{r demand_comparison}
+top_stations <- y_ridership %>%
+  filter(!is.na(fy2024_total)) %>%
+  slice_max(fy2024_total, n = 12) %>%
+  pull(station_en)
+
+long_df <- y_ridership %>%
+  filter(station_en %in% top_stations) %>%
+  select(station_en, fy2023_total, fy2024_total) %>%
+  pivot_longer(
+    cols      = c(fy2023_total, fy2024_total),
+    names_to  = "fy",
+    values_to = "daily_avg"
+  ) %>%
+  mutate(
+    fy_label = if_else(fy == "fy2023_total", "FY2023", "FY2024"),
+    hover    = paste0(station_en, " — ", fy_label,
+                      "<br>", scales::label_number(big.mark = ",")(daily_avg),
+                      " daily boardings")
+  )
+
+p2 <- ggplot(long_df, aes(
+    x    = reorder(station_en, daily_avg),
+    y    = daily_avg,
+    fill = fy_label,
+    text = hover
+  )) +
+  geom_col(position = "dodge", alpha = 0.88) +
+  coord_flip() +
+  scale_fill_manual(values = c(FY2023 = YELLOW, FY2024 = GREEN)) +
+  scale_y_continuous(labels = label_number(scale = 1e-3, suffix = "K")) +
+  labs(
+    title    = "Top 12 Stations — FY2023 vs FY2024",
+    subtitle = "Post-COVID recovery continuing across all major hubs",
+    x = NULL, y = "Daily average boardings", fill = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor   = element_blank(),
+    axis.line.x    = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks.x   = element_line(color = "gray30"),
+    plot.title     = element_text(face = "bold"),
+    legend.position = "top"
+  )
+
+ggplotly(p2, tooltip = "text") %>%
+  layout(hovermode = "closest", barmode = "group") %>%
+  config(displayModeBar = FALSE)
+```
+
+### Growth Rate
+
+```{r demand_growth}
+p3 <- y_ridership %>%
+  filter(!is.na(fy2024_yoy_pct)) %>%
+  mutate(
+    station_en  = reorder(station_en, fy2024_yoy_pct),
+    growth_band = if_else(fy2024_yoy_pct >= 103, "Above avg (>+3%)", "Below avg"),
+    hover       = paste0(station_en, "<br>YoY growth: +",
+                         round(fy2024_yoy_pct - 100, 1), "%")
+  ) %>%
+  ggplot(aes(x = station_en, y = fy2024_yoy_pct - 100,
+             fill = growth_band, text = hover)) +
+  geom_col(alpha = 0.85) +
+  geom_hline(yintercept = 0, linewidth = 0.8, color = "gray30") +
+  coord_flip() +
+  scale_fill_manual(values = c("Above avg (>+3%)" = GREEN, "Below avg" = "#aaa")) +
+  scale_y_continuous(labels = function(x) paste0("+", x, "%")) +
+  labs(
+    title    = "Station ridership growth FY2023 → FY2024",
+    subtitle = "Green = above-average growth (>+3%) • All Yamanote stations growing",
+    x = NULL, y = "Year-over-year change (%)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor   = element_blank(),
+    axis.line.x  = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks.x = element_line(color = "gray30"),
+    plot.title   = element_text(face = "bold")
+  )
+
+ggplotly(p3, tooltip = "text") %>%
+  layout(hovermode = "closest",
+         legend = list(title = list(text = ""))) %>%
+  config(displayModeBar = FALSE)
+```
+:::
+
+## Stop 3 — Frequency
+
+How often does a train come? This is where the two systems diverge most sharply — and where the Yamanote's loop design delivers its clearest advantage.
+
+On the BMT, scheduled trips per hour follow demand: high during rush hours, lower overnight, with weekends running noticeably less service than weekdays. The system scales supply to match expected demand — reasonable, but it means riders feel the difference between peak and off-peak.
+
+The Yamanote barely flinches. From early morning through late evening, trains arrive every 3–4 minutes on weekdays. The loop runs so frequently, and so consistently, that many Tokyo commuters don't check schedules — they just walk to the platform. The difference between peak and off-peak headways is measured in seconds, not minutes.
+
+::: {.callout-tip appearance="minimal" icon="false"}
+-   **BMT:** Service scales with demand — strong peaks, quieter off-hours, noticeable weekday/weekend gap.
+-   **Yamanote:** Headways stay flat across the day. The loop architecture eliminates the asymmetric demand problem that forces other systems to run less service off-peak.
+-   **Why it matters:** Consistent frequency is a form of reliability. When riders don't need to check a schedule, the system has already won half the battle.
+:::
+
+```{r stop3_frequency}
+
+mta_blue   <- "#0039A6"
+mta_orange <- "#FF6319"
+
+# Rush-hour markers 
+rush_lines <- c(8, 17)
+
+wk <- readr::read_csv("data/mta/bmt_trips_by_hour_weekday.csv", show_col_types = FALSE) %>%
+  mutate(day_type = "Weekday")
+we <- readr::read_csv("data/mta/bmt_trips_by_hour_weekend.csv", show_col_types = FALSE) %>%
+  mutate(day_type = "Weekend")
+
+tot <- bind_rows(wk, we) %>%
+  group_by(day_type, hour_service) %>%
+  summarize(trips = sum(trips, na.rm = TRUE), .groups = "drop") %>%
+  filter(hour_service <= 23) %>%
+  mutate(
+    day_phrase = if_else(day_type == "Weekend", "On weekends", "On weekdays"),
+    se = sqrt(pmax(trips, 1)),
+    lo = pmax(trips - 1.2 * se, 0),
+    hi = trips + 1.2 * se,
+    hover_text = paste0(
+      day_phrase, ", in hour ", hour_service,
+      ", there are ", trips, " trips scheduled."
+    )
+  )
+
+wk_df <- tot %>% filter(day_type == "Weekday")
+we_df <- tot %>% filter(day_type == "Weekend")
+
+y_top <- max(tot$hi, na.rm = TRUE) * 1.02
+
+peaks <- tot %>%
+  group_by(day_type) %>%
+  slice_max(trips, n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+p <- ggplot(tot, aes(hour_service, trips, color = day_type, group = day_type, text = hover_text)) +
+
+  geom_ribbon(
+    data = wk_df,
+    aes(x = hour_service, ymin = lo, ymax = hi),
+    inherit.aes = FALSE,
+    fill = mta_blue, alpha = 0.15
+  ) +
+  geom_ribbon(
+    data = we_df,
+    aes(x = hour_service, ymin = lo, ymax = hi),
+    inherit.aes = FALSE,
+    fill = mta_orange, alpha = 0.15
+  ) +
+  geom_line(linewidth = 1.4) +
+  geom_point(size = 2.4) +
+  geom_point(
+    data = peaks,
+    aes(hour_service, trips, group = day_type),
+    inherit.aes = FALSE,
+    size = 4.6,
+    shape = 21,
+    stroke = 1.6,
+    fill = "white",
+    color = "gray20"
+  ) +
+  geom_vline(xintercept = rush_lines, linetype = "dashed", linewidth = 0.9, alpha = 0.9) +
+  annotate(
+    "text",
+    x = rush_lines, y = y_top,
+    label = "Rush hour",
+    vjust = 0, size = 3.5, fontface = "bold", color = mta_blue
+  ) +
+  scale_color_manual(values = c(Weekday = mta_blue, Weekend = mta_orange)) +
+  scale_x_continuous(breaks = 0:23, limits = c(0, 23)) +
+  labs(
+    title = "Stop 3 — Frequency (BMT total service by hour)",
+    subtitle = "Lines show scheduled trips/hour. Shaded band is a visual range (schedule-based).",
+    x = "Service hour",
+    y = "Total scheduled trip starts",
+    color = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks = element_line(color = "gray30"),
+    plot.title = element_text(face = "bold"),
+    legend.position = "top"
+  )
+
+ggplotly(p, tooltip = "text") %>%
+  layout(
+    hovermode = "closest",
+    xaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE),
+    yaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE)
+  ) %>%
+  config(displayModeBar = FALSE, scrollZoom = FALSE, doubleClick = FALSE)
+```
+
+```{r yamanote_rush_hour_style_like_mta_fixed_legend}
+
+source("scripts/04_clean_jreast_gtfs.R")
+
+
+stopifnot(exists("y_week_profile"))
+
+GREEN  <- "#0CA10E"
+YELLOW <- "#FCCC0A"
+rush_lines <- c(8, 17)
+
+y_freq <- y_week_profile %>%
+  mutate(
+    day_type = factor(day_type, levels = c("Weekday","Weekend")),
+    se = sqrt(pmax(scheduled_departures, 1)),
+    lo = pmax(scheduled_departures - 1.2 * se, 0),
+    hi = scheduled_departures + 1.2 * se,
+    hover = paste0(
+  if_else(day_type == "Weekend", "On weekends", "On weekdays"),
+  ", in hour ", hour,
+  ", there are ", scheduled_departures, " departures scheduled."
+)
+  )
+
+wk <- y_freq %>% filter(day_type == "Weekday")
+we <- y_freq %>% filter(day_type == "Weekend")
+
+p <- ggplot(y_freq, aes(x = hour, y = scheduled_departures,
+                        color = day_type, group = day_type, text = hover)) +
+  # ribbons (explicit x + ymin/ymax; fixed fill so they don't control legend)
+  geom_ribbon(
+    data = wk,
+    aes(x = hour, ymin = lo, ymax = hi),
+    inherit.aes = FALSE,
+    fill = GREEN, alpha = 0.15
+  ) +
+  geom_ribbon(
+    data = we,
+    aes(x = hour, ymin = lo, ymax = hi),
+    inherit.aes = FALSE,
+    fill = YELLOW, alpha = 0.15
+  ) +
+  geom_line(linewidth = 1.3) +
+  geom_point(size = 2.6) +
+  geom_vline(xintercept = rush_lines, linetype = "dashed", linewidth = 0.9, alpha = 0.9) +
+  annotate("text", x = rush_lines, y = max(df$hi, na.rm = TRUE) * 0.96,
+           label = "Rush hour", vjust = 1, size = 3.5) +
+  scale_color_manual(values = c("Weekday" = GREEN, "Weekend" = YELLOW)) +
+  scale_x_continuous(breaks = 0:23) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "grey30", linewidth = 0.6),
+    axis.ticks = element_line(color = "grey30", linewidth = 0.6),
+    plot.title = element_text(face = "bold"),
+    legend.position = "right"
+  ) +
+  labs(
+    title = "Yamanote — Rush Hour 2025-2026 (scheduled departures by hour)",
+    subtitle = paste0("Reference station: ", ref_stop, " • Shaded band is a visual range (schedule-based)"),
+    x = "Hour of day",
+    y = "Scheduled departures",
+    color = NULL
+  )
+
+ggplotly(p, tooltip = "text") %>%
+  layout(
+    hovermode = "closest",
+    xaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE),
+    yaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE)
+  ) %>%
+  config(displayModeBar = FALSE, scrollZoom = FALSE, doubleClick = FALSE)
+```
+
+## Stop 4 — Reliability
+
+Reliability means something different in each city — and that difference is itself part of the story.
+
+In New York, the MTA measures on-time performance at the terminal: did the train complete its run within the allowable window? By that standard, the BMT runs around 86–88% on-time on weekdays, with weekends performing somewhat better. The numbers have softened over 2025, reflecting a system still contending with aging fixed-block signals, infrastructure constraints, and the cascading effects that come with a branching network.
+
+In Tokyo, the standard is departure within *seconds* of the posted schedule. JR East doesn't publish line-level delay statistics publicly, but independent reporting puts average delays on non-Shinkansen lines at around 50 seconds. The Yamanote operates under D-ATC (Digital Automatic Train Control), a system that continuously calculates safe following distances and allows trains to run closer together without human error as the limiting factor.
+
+::: {.callout-tip appearance="minimal" icon="false"}
+-   **NYC reliability:** Terminal OTP of \~87% weekday, \~90% weekend. Primary constraint is legacy fixed-block signaling — the same infrastructure challenge driving the MTA's ongoing signal modernization program.
+-   **Tokyo reliability:** Scheduled headway variance on the Yamanote is remarkably flat across the day. D-ATC removes the human reaction-time floor that limits how closely trains can follow each other.
+-   **What's comparable:** The metrics aren't directly equivalent — different definitions, different institutional cultures around what counts as "on time." But the direction of the gap is clear.
+:::
+
+```{r reliability}
+
+mta_blue   <- "#0039A6"
+mta_orange <- "#FF6319"
+
+overall <- readr::read_csv("data/mta/mta_otp_bmt_overall.csv", show_col_types = FALSE) %>%
+  mutate(
+    day_type = factor(day_type, levels = c("Weekday","Weekend")),
+    month = as.Date(month),
+    day_word = if_else(day_type == "Weekend", "Weekends", "Weekdays"),
+    month_lbl = format(month, "%B %Y"),
+    hover_text = paste0(day_word, " in ", month_lbl, " showed ",
+                        percent(otp, accuracy = 0.1),
+                        " on-time performance.")
+  )
+
+hi <- overall %>%
+  group_by(day_type) %>%
+  slice_max(otp, n = 1, with_ties = FALSE) %>%
+  bind_rows(
+    overall %>% group_by(day_type) %>% slice_min(otp, n = 1, with_ties = FALSE)
+  ) %>%
+  ungroup()
+
+x_pad_days <- 25
+x_min <- min(overall$month) - x_pad_days
+x_max <- max(overall$month) + x_pad_days
+
+p <- ggplot(overall, aes(month, otp, color = day_type, group = day_type, text = hover_text)) +
+  geom_line(linewidth = 1.35) +
+  geom_point(size = 2.8) +
+  geom_point(
+    data = hi,
+    aes(month, otp, group = day_type),
+    inherit.aes = FALSE,
+    size = 4.6,
+    shape = 21,
+    stroke = 1.6,
+    fill = "white",
+    color = "gray20"
+  ) +
+  scale_color_manual(values = c(Weekday = mta_blue, Weekend = mta_orange)) +
+  scale_x_date(limits = c(x_min, x_max)) +
+  scale_y_continuous(
+    labels = percent_format(accuracy = 1),
+    expand = expansion(mult = c(0.06, 0.12))
+  ) +
+  labs(
+    title = "BMT On-Time Performance — Weekday vs Weekend (2025)",
+    subtitle = "Trips-weighted terminal on-time performance (weekday vs weekend)",
+    x = NULL,
+    y = "On-time performance",
+    color = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks = element_line(color = "gray30"),
+    plot.title = element_text(face = "bold"),
+    legend.position = "top"
+  )
+
+ggplotly(p, tooltip = "text") %>%
+  layout(
+    legend = list(orientation = "v", x = 1.02, y = 0.5, xanchor = "left", yanchor = "middle"),
+    margin = list(r = 140),
+    hovermode = "closest",
+    xaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE),
+    yaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE)
+  ) %>%
+  config(
+    displayModeBar = FALSE,
+    scrollZoom = FALSE,
+    doubleClick = FALSE
+  )
+```
+
+```{r yamanote_headway_clean}
+GREEN    <- "#0CA10E"
+YELLOW   <- "#FCCC0A"
+
+hp <- read_csv("data/processed/jreast/yamanote_headway_profile.csv",
+               show_col_types = FALSE) %>%
+  mutate(day_type = factor(day_type, levels = c("Weekday", "Weekend")))
+
+ref <- hp$ref_stop[1]
+wk  <- hp %>% filter(day_type == "Weekday")
+we  <- hp %>% filter(day_type == "Weekend")
+
+wk_peak <- wk %>% filter(hour %in% 8:9) %>% pull(median_hw_min) %>% median(na.rm = TRUE)
+y_max   <- max(hp$q75, na.rm = TRUE) * 1.2
+
+p <- ggplot(hp, aes(
+    x = hour, y = median_hw_min,
+    color = day_type, group = day_type,
+    text = paste0(
+  if_else(day_type == "Weekend", "On weekends", "On weekdays"),
+  ", at hour ", hour,
+  ", trains arrive every ", round(median_hw_min, 1), " minutes on average."
+)
+  )) +
+  geom_ribbon(data = wk, aes(x = hour, ymin = q25, ymax = q75),
+              inherit.aes = FALSE, fill = GREEN,  alpha = 0.15) +
+  geom_ribbon(data = we, aes(x = hour, ymin = q25, ymax = q75),
+              inherit.aes = FALSE, fill = YELLOW, alpha = 0.15) +
+  geom_line(linewidth = 1.4) +
+  geom_point(size = 2.8) +
+  scale_color_manual(values = c(Weekday = GREEN, Weekend = YELLOW)) +
+  geom_vline(xintercept = c(8, 17), linetype = "dashed",
+             linewidth = 0.9, color = "gray50") +
+  annotate("text", x = 8,  y = y_max, label = "AM rush",
+           hjust = 0.5, size = 3.2, color = "gray40") +
+  annotate("text", x = 17, y = y_max, label = "PM rush",
+           hjust = 0.5, size = 3.2, color = "gray40") +
+  # The story: how flat the line is
+  annotate("segment", x = 8, xend = 17, y = wk_peak, yend = wk_peak,
+           color = GREEN, linewidth = 0.7, linetype = "dotted") +
+  annotate("label", x = 12.5, y = wk_peak + 0.6,
+           label = paste0("~", round(wk_peak, 1), " min all peak hours"),
+           size = 3.1, color = GREEN, fill = "white", label.size = 0,
+           fontface = "bold") +
+  scale_x_continuous(breaks = 5:23) +
+  scale_y_continuous(
+    breaks = seq(0, 12, 2),
+    limits = c(0, y_max + 1),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    title = "Yamanote Line — Minutes between trains by hour",
+    subtitle = paste0("Lower = more frequent  •  Ref. station: ", ref,
+                      "  •  Shaded = IQR  •  Source: JR East GTFS"),
+    x = "Hour of day", y = "Minutes between trains", color = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line  = element_line(color = "gray30", linewidth = 0.6),
+    axis.ticks = element_line(color = "gray30"),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "gray40", size = 10),
+    legend.position = "top"
+  )
+
+ggplotly(p, tooltip = "text") %>%
+  layout(
+    hovermode = "closest",
+    xaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE),
+    yaxis = list(showgrid = FALSE, fixedrange = TRUE, zeroline = FALSE)
+  ) %>%
+  config(displayModeBar = FALSE, scrollZoom = FALSE, doubleClick = FALSE)
+```
+
+------------------------------------------------------------------------
+
+## So What?
+
+NYC can't copy-paste Tokyo — different scale, different history, different labor and capital constraints. But the principle transfers: investment in modern signal and train control technology increases throughput *and* reduces the cascading failures that turn one late train into twenty. That's not a Tokyo lesson. That's just physics.
+
+This comparison also became a story about what cities choose to measure and what they choose to share. Tokyo runs a tighter, more consistent service — and keeps most of its operational data locked away in annual reports. New York runs a more complex, more exposed system — and publishes enough granular data that you can watch it struggle in real time.
+
+Neither approach is obviously better. But the gap in what each city *knows* about its own system, and what it *shares* publicly, is almost as interesting as the gap in performance.
+
+::: {.callout-note appearance="minimal"}
+*For full methodology, data sources, and limitations — see the [Data & Methods](data.qmd) page.*
+:::
+

@@ -1,0 +1,299 @@
+/*-- scss:defaults --*/
+
+// Transit-inspired color palette
+$body-bg: #0a0a0f;
+$body-color: #e8e8e8;
+$link-color: #FCCC0A;
+$font-family-sans-serif: "DM Sans", sans-serif;
+$font-family-monospace: "DM Mono", monospace;
+$headings-font-family: "Barlow Condensed", sans-serif;
+$headings-font-weight: 700;
+$headings-letter-spacing: 0.02em;
+
+/*-- scss:rules --*/
+
+// Google Fonts import
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+
+// ── Root variables ────────────────────────────────────────────
+:root {
+  --mta-blue:     #0039A6;
+  --mta-orange:   #FF6319;
+  --mta-yellow:   #FCCC0A;
+  --mta-silver:   #A7A9AC;
+  --jr-green:     #0CA10E;
+  --platform-bg:  #111118;
+  --card-bg:      #16161f;
+  --border:       rgba(255,255,255,0.08);
+  --text-dim:     #888899;
+}
+
+// ── Body & base ───────────────────────────────────────────────
+body {
+  background-color: #0a0a0f;
+  color: #e0e0e8;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 300;
+}
+
+// ── Navbar — subway header bar ────────────────────────────────
+.navbar {
+  background: #0039A6 !important;
+  border-bottom: 4px solid var(--mta-yellow) !important;
+  padding: 0.6rem 1.5rem;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.navbar-brand {
+  color: #fff !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+}
+
+.navbar-brand::before {
+  content: "🚇 ";
+}
+
+.navbar .nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  padding: 0.4rem 0.9rem !important;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+  color: var(--mta-yellow) !important;
+  background: rgba(255,255,255,0.08);
+}
+
+// ── Page title — destination board style ──────────────────────
+.title {
+  font-family: "Barlow Condensed", sans-serif !important;
+  font-size: 3.2rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff !important;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 300 !important;
+  color: var(--mta-yellow) !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+// ── Section headings — platform sign style ────────────────────
+h2 {
+  font-family: "Barlow Condensed", sans-serif !important;
+  font-size: 1.9rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff !important;
+  border-left: 5px solid var(--mta-yellow);
+  padding-left: 0.75rem;
+  margin-top: 2.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+h3 {
+  font-family: "Barlow Condensed", sans-serif !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mta-silver) !important;
+  margin-top: 1.5rem !important;
+}
+
+// ── Body text ─────────────────────────────────────────────────
+p {
+  font-size: 0.97rem;
+  line-height: 1.75;
+  color: #c8c8d8;
+  max-width: 72ch;
+}
+
+// ── Callout boxes — transit info panels ───────────────────────
+.callout {
+  background: var(--card-bg) !important;
+  border-left: 4px solid var(--mta-yellow) !important;
+  border-radius: 0 !important;
+  padding: 1rem 1.25rem !important;
+  margin: 1.25rem 0 !important;
+  font-size: 0.92rem;
+}
+
+.callout-note {
+  border-left-color: var(--mta-blue) !important;
+}
+
+.callout-tip {
+  border-left-color: var(--jr-green) !important;
+}
+
+.callout p, .callout li {
+  color: #c8c8d8 !important;
+  max-width: none;
+}
+
+.callout strong {
+  color: var(--mta-yellow) !important;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ── TOC — line map style ──────────────────────────────────────
+#TOC {
+  background: transparent;
+  border-left: 2px solid var(--mta-blue);
+  padding: 0.5rem 0 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+#TOC .toc-title {
+  color: var(--text-dim) !important;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+#TOC a {
+  color: var(--text-dim) !important;
+  font-size: 0.8rem;
+  padding: 0.15rem 0;
+  display: block;
+  border: none;
+}
+
+#TOC a:hover, #TOC a.active {
+  color: var(--mta-yellow) !important;
+  border: none;
+}
+// ── Horizontal rule — track divider ──────────────────────────
+hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 2.5rem 0;
+  position: relative;
+}
+
+hr::after {
+  content: "◆";
+  position: absolute;
+  left: 50%;
+  top: -0.7rem;
+  transform: translateX(-50%);
+  color: var(--mta-yellow);
+  font-size: 0.7rem;
+  background: #0a0a0f;
+  padding: 0 0.5rem;
+}
+
+// ── Blockquote — announcement board ─────────────────────────
+blockquote {
+  background: var(--card-bg);
+  border-left: 4px solid var(--mta-orange) !important;
+  padding: 0.9rem 1.2rem;
+  margin: 1.5rem 0;
+  font-family: "DM Mono", monospace;
+  font-size: 0.88rem;
+  color: #e0e0e8;
+  letter-spacing: 0.01em;
+}
+
+// ── Links ─────────────────────────────────────────────────────
+a {
+  color: var(--mta-yellow);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(252, 204, 10, 0.3);
+  transition: border-color 0.2s;
+}
+
+a:hover {
+  border-bottom-color: var(--mta-yellow);
+}
+
+// ── Main content area ─────────────────────────────────────────
+main {
+  padding-top: 2rem;
+}
+
+.page-columns .column-body {
+  padding-right: 2rem;
+}
+
+// ── Panel tabset — route selector style ──────────────────────
+.panel-tabset .nav-tabs {
+  border-bottom: 2px solid var(--mta-blue) !important;
+  gap: 0.25rem;
+}
+
+.panel-tabset .nav-tabs .nav-link {
+  font-family: "DM Sans", sans-serif !important;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 0.9rem !important;
+  color: var(--text-dim) !important;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  padding: 0.4rem 1rem !important;
+  transition: all 0.2s;
+}
+
+.panel-tabset .nav-tabs .nav-link.active {
+  color: #000 !important;
+  background: var(--mta-yellow) !important;
+  border-color: var(--mta-yellow) !important;
+}
+
+.panel-tabset .nav-tabs .nav-link:hover:not(.active) {
+  color: #fff !important;
+  background: var(--mta-blue) !important;
+}
+
+.panel-tabset .tab-content {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: none;
+  padding: 1.5rem;
+}
+
+// ── Plotly/leaflet chart containers ──────────────────────────
+.plotly, .leaflet {
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+}
+
+// ── Footer ────────────────────────────────────────────────────
+.nav-footer {
+  background: var(--platform-bg) !important;
+  border-top: 2px solid var(--mta-blue) !important;
+  color: var(--text-dim) !important;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

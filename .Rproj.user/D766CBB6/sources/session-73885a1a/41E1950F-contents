@@ -1,0 +1,21 @@
+---
+  title: "About"
+---
+  
+  ## The Project
+  
+  **Ride the Line** is a data capstone project comparing two of the world's busiest urban rail systems: the MTA's Brooklyn-Manhattan Transit (BMT) group in New York City, and JR East's Yamanote Line in Tokyo.
+
+Both systems move millions of people daily through dense, high-demand corridors. But they were built in different eras, operate under different institutional structures, and make very different amounts of their data publicly available. This project asks: what can we actually compare, and what does that comparison reveal about service design, reliability, and the value of open transit data?
+
+## About Me
+
+Hiii! My name is Andreina Abreu and I am a graduate student studying Data Analytics & Visualization at The CUNY Graduate Center.
+
+## Acknowledgments
+
+Data sourced from the [MTA Open Data Portal](https://data.mta.info), the [Open Data Platform for Public Transportation (ODPT)](https://www.odpt.org), and [JR East's official passenger statistics](https://www.jreast.co.jp/en/company/data/passenger/).
+
+Built with [R](https://www.r-project.org) and [Quarto](https://quarto.org).
+
+> *For full methodology and analysis, see the accompanying white paper.*
