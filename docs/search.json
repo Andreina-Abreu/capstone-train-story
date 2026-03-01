@@ -1,0 +1,128 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Ride the Line",
+    "section": "",
+    "text": "Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA’s Brooklyn-Manhattan Transit group and JR East’s Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.\nBut how they solve that problem — and how much they’re willing to show you about how they’re doing it — turns out to be very different.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
+  },
+  {
+    "objectID": "index.html#welcome-aboard",
+    "href": "index.html#welcome-aboard",
+    "title": "Ride the Line",
+    "section": "",
+    "text": "Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA’s Brooklyn-Manhattan Transit group and JR East’s Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.\nBut how they solve that problem — and how much they’re willing to show you about how they’re doing it — turns out to be very different.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
+  },
+  {
+    "objectID": "index.html#stop-1-the-networks",
+    "href": "index.html#stop-1-the-networks",
+    "title": "Ride the Line",
+    "section": "Stop 1 — The Networks",
+    "text": "Stop 1 — The Networks\nBefore comparing numbers, it helps to see what we’re actually comparing. The BMT is a web: eight lines branching across Brooklyn, Manhattan, and Queens, sharing tracks, splitting at junctions, and serving dozens of distinct neighborhoods. The Yamanote is a loop: one line, 29 stations, running clockwise and counterclockwise around central Tokyo without a beginning or an end.\nThat structural difference matters. A loop has no terminal bottlenecks, no branching complexity, and no direction — a delay anywhere propagates around the whole circuit equally. The BMT’s branching structure creates flexibility but also fragility: a problem on one trunk can cascade across multiple lines.\n\n\n\n\n\n\n\nScale: The BMT spans roughly 80 miles of track across three boroughs. The Yamanote covers just 21 miles — but within that loop sits some of the most valuable urban land on earth, and 26 of its 29 stations rank among JR East’s 100 busiest.\nStructure: BMT = branching network, shared trunks, multiple termini. Yamanote = closed loop, single service, no branches."
+  },
+  {
+    "objectID": "index.html#mta-brooklyn-manhattan-transit-bmt-map",
+    "href": "index.html#mta-brooklyn-manhattan-transit-bmt-map",
+    "title": "Ride the Line",
+    "section": "MTA Brooklyn-Manhattan Transit (BMT) Map",
+    "text": "MTA Brooklyn-Manhattan Transit (BMT) Map"
+  },
+  {
+    "objectID": "index.html#jr-east-yamanote-line-map",
+    "href": "index.html#jr-east-yamanote-line-map",
+    "title": "Ride the Line",
+    "section": "JR East Yamanote Line Map",
+    "text": "JR East Yamanote Line Map"
+  },
+  {
+    "objectID": "index.html#stop-2-demand",
+    "href": "index.html#stop-2-demand",
+    "title": "Ride the Line",
+    "section": "Stop 2 — Demand",
+    "text": "Stop 2 — Demand\nNew York and Tokyo approach peak demand differently — and the data tells that story clearly, even accounting for what Tokyo doesn’t share publicly.\nOn the BMT, weekday demand builds sharply into the morning rush and collapses just as sharply in the off-peak. The gap between 8am on a weekday and a Sunday afternoon is enormous. Weekends show a flatter, later-peaking curve — riders shifting from commuters to leisure travelers.\nFor the Yamanote, JR East publishes annual daily average boardings per station rather than hourly ridership. What that data shows is striking in its own way: Shinjuku alone handles over 666,000 daily boardings. The top 12 stations on the loop collectively move more people per day than many entire transit systems — and every single station grew year-over-year from FY2023 to FY2024, continuing Tokyo’s post-COVID recovery.\n\n\n\n\n\n\n\nPeak timing: BMT peaks sharply at 8am and 5pm on weekdays. Yamanote demand is spread more evenly across the day — the loop design means there’s no single choke point that concentrates demand.\nWeekend shift: BMT weekend ridership drops significantly and peaks later (~noon). Yamanote’s mix of commuters, tourists, and leisure riders means weekends remain high volume at major hubs like Shibuya and Shinjuku.\nData gap: NYC provides hourly ridership; Tokyo provides annual station totals. The Yamanote frequency charts below use scheduled departures as a supply-side proxy — the best available measure given what JR East publishes publicly."
+  },
+  {
+    "objectID": "index.html#yamanote-station-demand",
+    "href": "index.html#yamanote-station-demand",
+    "title": "Ride the Line",
+    "section": "Yamanote Station Demand",
+    "text": "Yamanote Station Demand\n\nStation RankingFY2023 vs FY2024Growth Rate"
+  },
+  {
+    "objectID": "index.html#stop-3-frequency",
+    "href": "index.html#stop-3-frequency",
+    "title": "Ride the Line",
+    "section": "Stop 3 — Frequency",
+    "text": "Stop 3 — Frequency\nHow often does a train come? This is where the two systems diverge most sharply — and where the Yamanote’s loop design delivers its clearest advantage.\nOn the BMT, scheduled trips per hour follow demand: high during rush hours, lower overnight, with weekends running noticeably less service than weekdays. The system scales supply to match expected demand — reasonable, but it means riders feel the difference between peak and off-peak.\nThe Yamanote barely flinches. From early morning through late evening, trains arrive every 3–4 minutes on weekdays. The loop runs so frequently, and so consistently, that many Tokyo commuters don’t check schedules — they just walk to the platform. The difference between peak and off-peak headways is measured in seconds, not minutes.\n\n\n\n\n\n\n\nBMT: Service scales with demand — strong peaks, quieter off-hours, noticeable weekday/weekend gap.\nYamanote: Headways stay flat across the day. The loop architecture eliminates the asymmetric demand problem that forces other systems to run less service off-peak.\nWhy it matters: Consistent frequency is a form of reliability. When riders don’t need to check a schedule, the system has already won half the battle."
+  },
+  {
+    "objectID": "index.html#stop-4-reliability",
+    "href": "index.html#stop-4-reliability",
+    "title": "Ride the Line",
+    "section": "Stop 4 — Reliability",
+    "text": "Stop 4 — Reliability\nReliability means something different in each city — and that difference is itself part of the story.\nIn New York, the MTA measures on-time performance at the terminal: did the train complete its run within the allowable window? By that standard, the BMT runs around 86–88% on-time on weekdays, with weekends performing somewhat better. The numbers have softened over 2025, reflecting a system still contending with aging fixed-block signals, infrastructure constraints, and the cascading effects that come with a branching network.\nIn Tokyo, the standard is departure within seconds of the posted schedule. JR East doesn’t publish line-level delay statistics publicly, but independent reporting puts average delays on non-Shinkansen lines at around 50 seconds. The Yamanote operates under D-ATC (Digital Automatic Train Control), a system that continuously calculates safe following distances and allows trains to run closer together without human error as the limiting factor.\n\n\n\n\n\n\n\nNYC reliability: Terminal OTP of ~87% weekday, ~90% weekend. Primary constraint is legacy fixed-block signaling — the same infrastructure challenge driving the MTA’s ongoing signal modernization program.\nTokyo reliability: Scheduled headway variance on the Yamanote is remarkably flat across the day. D-ATC removes the human reaction-time floor that limits how closely trains can follow each other.\nWhat’s comparable: The metrics aren’t directly equivalent — different definitions, different institutional cultures around what counts as “on time.” But the direction of the gap is clear."
+  },
+  {
+    "objectID": "index.html#so-what",
+    "href": "index.html#so-what",
+    "title": "Ride the Line",
+    "section": "So What?",
+    "text": "So What?\nNYC can’t copy-paste Tokyo — different scale, different history, different labor and capital constraints. But the principle transfers: investment in modern signal and train control technology increases throughput and reduces the cascading failures that turn one late train into twenty. That’s not a Tokyo lesson. That’s just physics.\nThis comparison also became a story about what cities choose to measure and what they choose to share. Tokyo runs a tighter, more consistent service — and keeps most of its operational data locked away in annual reports. New York runs a more complex, more exposed system — and publishes enough granular data that you can watch it struggle in real time.\nNeither approach is obviously better. But the gap in what each city knows about its own system, and what it shares publicly, is almost as interesting as the gap in performance.\n\n\n\n\n\n\nFor full methodology, data sources, and limitations — see the Data & Methods page."
+  },
+  {
+    "objectID": "data.html",
+    "href": "data.html",
+    "title": "Data & Methods",
+    "section": "",
+    "text": "This project compares two of the world’s busiest urban rail systems — the MTA’s Brooklyn-Manhattan Transit (BMT) group and JR East’s Yamanote Line — across four dimensions: network structure, passenger demand, service frequency, and reliability."
+  },
+  {
+    "objectID": "data.html#data-sources",
+    "href": "data.html#data-sources",
+    "title": "Data & Methods",
+    "section": "Data Sources",
+    "text": "Data Sources\n\nMTA (New York City)\nMTA data is publicly available through the MTA Open Data Portal and covers 2024–2025.\n\nGTFS — static schedule files (routes, trips, stop times, shapes) used to map the BMT network and compute scheduled trip frequency\nHourly ridership — average riders by hour of day, segmented by weekday and weekend\nOn-time performance (OTP) — monthly terminal OTP by day type, used as the primary reliability metric\n\n\n\nJR East (Tokyo)\nJR East data is more limited in public granularity than MTA. Three sources were combined:\n\nGTFS via ODPT — Open Data Platform for Public Transportation, used for the Yamanote schedule, stop locations, and headway computation\nPassenger survey (JSON) — annual station-level boarding counts published via ODPT\nAnnual station boardings — daily average boardings per station published at jreast.co.jp, covering FY2023 and FY2024"
+  },
+  {
+    "objectID": "data.html#key-limitations",
+    "href": "data.html#key-limitations",
+    "title": "Data & Methods",
+    "section": "Key Limitations",
+    "text": "Key Limitations\n\nNo hourly ridership for Yamanote. JR East does not publish intraday ridership publicly. Frequency charts use scheduled departures as a supply-side proxy.\nDifferent reliability definitions. MTA measures on-time performance at the terminal. Japan’s standard measures departure to within seconds of schedule — these are not directly comparable metrics.\nBoarding counts only. JR East station data counts boardings (entries) only. MTA turnstile data counts both entries and exits separately.\nHeadways computed from scheduled GTFS, not observed operations. Actual headway variance during disruptions is not captured."
+  },
+  {
+    "objectID": "data.html#tools",
+    "href": "data.html#tools",
+    "title": "Data & Methods",
+    "section": "Tools",
+    "text": "Tools\nAnalysis and visualization were built entirely in R using tidyverse, plotly, leaflet, scales, and sf. The site is built with Quarto.\nFor the complete methodology, analytical decisions, and limitations discussion, see the full white paper."
+  },
+  {
+    "objectID": "aboutme.html",
+    "href": "aboutme.html",
+    "title": "About",
+    "section": "",
+    "text": "Ride the Line is a data capstone project comparing two of the world’s busiest urban rail systems: the MTA’s Brooklyn-Manhattan Transit (BMT) group in New York City, and JR East’s Yamanote Line in Tokyo.\nBoth systems move millions of people daily through dense, high-demand corridors. But they were built in different eras, operate under different institutional structures, and make very different amounts of their data publicly available. This project asks: what can we actually compare, and what does that comparison reveal about service design, reliability, and the value of open transit data?"
+  },
+  {
+    "objectID": "aboutme.html#the-project",
+    "href": "aboutme.html#the-project",
+    "title": "About",
+    "section": "",
+    "text": "Ride the Line is a data capstone project comparing two of the world’s busiest urban rail systems: the MTA’s Brooklyn-Manhattan Transit (BMT) group in New York City, and JR East’s Yamanote Line in Tokyo.\nBoth systems move millions of people daily through dense, high-demand corridors. But they were built in different eras, operate under different institutional structures, and make very different amounts of their data publicly available. This project asks: what can we actually compare, and what does that comparison reveal about service design, reliability, and the value of open transit data?"
+  },
+  {
+    "objectID": "aboutme.html#about-me",
+    "href": "aboutme.html#about-me",
+    "title": "About",
+    "section": "About Me",
+    "text": "About Me\nHiii! My name is Andreina Abreu and I am a graduate student studying Data Analytics & Visualization at The CUNY Graduate Center."
+  },
+  {
+    "objectID": "aboutme.html#acknowledgments",
+    "href": "aboutme.html#acknowledgments",
+    "title": "About",
+    "section": "Acknowledgments",
+    "text": "Acknowledgments\nData sourced from the MTA Open Data Portal, the Open Data Platform for Public Transportation (ODPT), and JR East’s official passenger statistics.\nBuilt with R and Quarto.\n\nFor full methodology and analysis, see the accompanying white paper."
+  }
+]
