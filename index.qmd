@@ -14,17 +14,52 @@ format:
 
 ## Welcome Aboard
 
-Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA's Brooklyn-Manhattan Transit group and JR East's Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.
+December 2025, I'm in Tokyo for the first time. Someone on my Instagram 
+had already told me what to do before I landed: download Google Maps, it 
+has the most accurate Yamanote Line schedule. I did it, mostly out of 
+curiosity.
 
-But how they solve that problem — and how much they're willing to show you about how they're doing it — turns out to be very different.
+The train came exactly when it said it would. Then the next one. Then the 
+one after that. Two weeks riding that loop around the city and I never once 
+pulled out my phone to check if something was running late, because nothing 
+was. The schedule was just accurate. That was the whole thing.
+
+I came home to New York and opened the MTA app out of habit. Delayed.
+
+That contrast is what this project is actually about. Not a complaint — a 
+real question: why does one system do what it says it's going to do, and 
+the other treat its own schedule like a rough suggestion? The answer goes 
+deeper than punctuality. It gets into how each system is physically built, 
+how demand moves through it, how often trains actually come, and — maybe 
+most surprisingly — what each city chooses to measure and share about how 
+it's performing at all.
+
+Four things this piece is going to get into:
+
+- Why the physical layout of each system, a branching web versus a closed 
+  loop, shapes almost everything else
+- Where and when each city actually moves its riders, and what the data gap 
+  between them reveals
+- What "frequent" really means and why consistent service matters more than 
+  peak service
+- What reliability data each city publishes, what it keeps quiet, and what 
+  both of those choices tell you
+
+One note before we go: these two systems are not perfectly comparable, and 
+this project doesn't pretend otherwise. The MTA publishes hourly ridership 
+for every station, monthly on-time performance by line, and full schedule 
+data as open data. JR East publishes annual station totals and schedules, 
+but no hourly ridership and no delay archives. Where direct comparison isn't 
+possible, the charts show what is comparable and name the gap. That 
+asymmetry is a finding, not just a limitation.
 
 ::: {.callout-note appearance="minimal"}
-*How do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?*
+*How do service design and demand patterns differ between the BMT and the 
+Yamanote Line, and what does that suggest about reliability and passenger 
+experience?*
 :::
 
 ------------------------------------------------------------------------
-
-
 
 ```{r setup}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
@@ -72,7 +107,6 @@ ps_y_long <- ps_y %>%
     passengerJourneys = `odpt:passengerJourneys`
   )
 ```
-
 
 ## Stop 1 — The Networks
 
@@ -907,4 +941,3 @@ Neither approach is obviously better. But the gap in what each city *knows* abou
 ::: {.callout-note appearance="minimal"}
 *For full methodology, data sources, and limitations — see the [Data & Methods](data.qmd) page.*
 :::
-
