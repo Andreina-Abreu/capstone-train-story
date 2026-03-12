@@ -4,14 +4,14 @@
     "href": "index.html",
     "title": "Ride the Line",
     "section": "",
-    "text": "Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA’s Brooklyn-Manhattan Transit group and JR East’s Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.\nBut how they solve that problem — and how much they’re willing to show you about how they’re doing it — turns out to be very different.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
+    "text": "December 2025, I’m in Tokyo for the first time. Someone on my Instagram had already told me what to do before I landed: download Google Maps, it has the most accurate Yamanote Line schedule. I did it, mostly out of curiosity.\nThe train came exactly when it said it would. Then the next one. Then the one after that. Two weeks riding that loop around the city and I never once pulled out my phone to check if something was running late, because nothing was. The schedule was just accurate. That was the whole thing.\nI came home to New York and opened the MTA app out of habit. Delayed.\nThat contrast is what this project is actually about. Not a complaint — a real question: why does one system do what it says it’s going to do, and the other treat its own schedule like a rough suggestion? The answer goes deeper than punctuality. It gets into how each system is physically built, how demand moves through it, how often trains actually come, and — maybe most surprisingly — what each city chooses to measure and share about how it’s performing at all.\nFour things this piece is going to get into:\n\nWhy the physical layout of each system, a branching web versus a closed loop, shapes almost everything else\nWhere and when each city actually moves its riders, and what the data gap between them reveals\nWhat “frequent” really means and why consistent service matters more than peak service\nWhat reliability data each city publishes, what it keeps quiet, and what both of those choices tell you\n\nOne note before we go: these two systems are not perfectly comparable, and this project doesn’t pretend otherwise. The MTA publishes hourly ridership for every station, monthly on-time performance by line, and full schedule data as open data. JR East publishes annual station totals and schedules, but no hourly ridership and no delay archives. Where direct comparison isn’t possible, the charts show what is comparable and name the gap. That asymmetry is a finding, not just a limitation.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
   },
   {
     "objectID": "index.html#welcome-aboard",
     "href": "index.html#welcome-aboard",
     "title": "Ride the Line",
     "section": "",
-    "text": "Every weekday, millions of people trust two very different rail systems to get them where they need to go — one threading through the boroughs of New York City, the other looping endlessly around the heart of Tokyo. The MTA’s Brooklyn-Manhattan Transit group and JR East’s Yamanote Line share the same fundamental problem: move as many people as possible, as reliably as possible, through one of the densest urban environments on earth.\nBut how they solve that problem — and how much they’re willing to show you about how they’re doing it — turns out to be very different.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
+    "text": "December 2025, I’m in Tokyo for the first time. Someone on my Instagram had already told me what to do before I landed: download Google Maps, it has the most accurate Yamanote Line schedule. I did it, mostly out of curiosity.\nThe train came exactly when it said it would. Then the next one. Then the one after that. Two weeks riding that loop around the city and I never once pulled out my phone to check if something was running late, because nothing was. The schedule was just accurate. That was the whole thing.\nI came home to New York and opened the MTA app out of habit. Delayed.\nThat contrast is what this project is actually about. Not a complaint — a real question: why does one system do what it says it’s going to do, and the other treat its own schedule like a rough suggestion? The answer goes deeper than punctuality. It gets into how each system is physically built, how demand moves through it, how often trains actually come, and — maybe most surprisingly — what each city chooses to measure and share about how it’s performing at all.\nFour things this piece is going to get into:\n\nWhy the physical layout of each system, a branching web versus a closed loop, shapes almost everything else\nWhere and when each city actually moves its riders, and what the data gap between them reveals\nWhat “frequent” really means and why consistent service matters more than peak service\nWhat reliability data each city publishes, what it keeps quiet, and what both of those choices tell you\n\nOne note before we go: these two systems are not perfectly comparable, and this project doesn’t pretend otherwise. The MTA publishes hourly ridership for every station, monthly on-time performance by line, and full schedule data as open data. JR East publishes annual station totals and schedules, but no hourly ridership and no delay archives. Where direct comparison isn’t possible, the charts show what is comparable and name the gap. That asymmetry is a finding, not just a limitation.\n\n\n\n\n\n\nHow do service design and demand patterns differ between the BMT and the Yamanote Line, and what does that suggest about reliability and passenger experience?"
   },
   {
     "objectID": "index.html#stop-1-the-networks",
@@ -70,34 +70,6 @@
     "text": "So What?\nNYC can’t copy-paste Tokyo — different scale, different history, different labor and capital constraints. But the principle transfers: investment in modern signal and train control technology increases throughput and reduces the cascading failures that turn one late train into twenty. That’s not a Tokyo lesson. That’s just physics.\nThis comparison also became a story about what cities choose to measure and what they choose to share. Tokyo runs a tighter, more consistent service — and keeps most of its operational data locked away in annual reports. New York runs a more complex, more exposed system — and publishes enough granular data that you can watch it struggle in real time.\nNeither approach is obviously better. But the gap in what each city knows about its own system, and what it shares publicly, is almost as interesting as the gap in performance.\n\n\n\n\n\n\nFor full methodology, data sources, and limitations — see the Data & Methods page."
   },
   {
-    "objectID": "data.html",
-    "href": "data.html",
-    "title": "Data & Methods",
-    "section": "",
-    "text": "This project compares two of the world’s busiest urban rail systems — the MTA’s Brooklyn-Manhattan Transit (BMT) group and JR East’s Yamanote Line — across four dimensions: network structure, passenger demand, service frequency, and reliability."
-  },
-  {
-    "objectID": "data.html#data-sources",
-    "href": "data.html#data-sources",
-    "title": "Data & Methods",
-    "section": "Data Sources",
-    "text": "Data Sources\n\nMTA (New York City)\nMTA data is publicly available through the MTA Open Data Portal and covers 2024–2025.\n\nGTFS — static schedule files (routes, trips, stop times, shapes) used to map the BMT network and compute scheduled trip frequency\nHourly ridership — average riders by hour of day, segmented by weekday and weekend\nOn-time performance (OTP) — monthly terminal OTP by day type, used as the primary reliability metric\n\n\n\nJR East (Tokyo)\nJR East data is more limited in public granularity than MTA. Three sources were combined:\n\nGTFS via ODPT — Open Data Platform for Public Transportation, used for the Yamanote schedule, stop locations, and headway computation\nPassenger survey (JSON) — annual station-level boarding counts published via ODPT\nAnnual station boardings — daily average boardings per station published at jreast.co.jp, covering FY2023 and FY2024"
-  },
-  {
-    "objectID": "data.html#key-limitations",
-    "href": "data.html#key-limitations",
-    "title": "Data & Methods",
-    "section": "Key Limitations",
-    "text": "Key Limitations\n\nNo hourly ridership for Yamanote. JR East does not publish intraday ridership publicly. Frequency charts use scheduled departures as a supply-side proxy.\nDifferent reliability definitions. MTA measures on-time performance at the terminal. Japan’s standard measures departure to within seconds of schedule — these are not directly comparable metrics.\nBoarding counts only. JR East station data counts boardings (entries) only. MTA turnstile data counts both entries and exits separately.\nHeadways computed from scheduled GTFS, not observed operations. Actual headway variance during disruptions is not captured."
-  },
-  {
-    "objectID": "data.html#tools",
-    "href": "data.html#tools",
-    "title": "Data & Methods",
-    "section": "Tools",
-    "text": "Tools\nAnalysis and visualization were built entirely in R using tidyverse, plotly, leaflet, scales, and sf. The site is built with Quarto.\nFor the complete methodology, analytical decisions, and limitations discussion, see the full white paper."
-  },
-  {
     "objectID": "aboutme.html",
     "href": "aboutme.html",
     "title": "About",
@@ -124,5 +96,33 @@
     "title": "About",
     "section": "Acknowledgments",
     "text": "Acknowledgments\nData sourced from the MTA Open Data Portal, the Open Data Platform for Public Transportation (ODPT), and JR East’s official passenger statistics.\nBuilt with R and Quarto.\n\nFor full methodology and analysis, see the accompanying white paper."
+  },
+  {
+    "objectID": "data.html",
+    "href": "data.html",
+    "title": "Data & Methods",
+    "section": "",
+    "text": "This project compares two of the world’s busiest urban rail systems — the MTA’s Brooklyn-Manhattan Transit (BMT) group and JR East’s Yamanote Line — across four dimensions: network structure, passenger demand, service frequency, and reliability."
+  },
+  {
+    "objectID": "data.html#data-sources",
+    "href": "data.html#data-sources",
+    "title": "Data & Methods",
+    "section": "Data Sources",
+    "text": "Data Sources\n\nMTA (New York City)\nMTA data is publicly available through the MTA Open Data Portal and covers 2024–2025.\n\nGTFS — static schedule files (routes, trips, stop times, shapes) used to map the BMT network and compute scheduled trip frequency\nHourly ridership — average riders by hour of day, segmented by weekday and weekend\nOn-time performance (OTP) — monthly terminal OTP by day type, used as the primary reliability metric\n\n\n\nJR East (Tokyo)\nJR East data is more limited in public granularity than MTA. Three sources were combined:\n\nGTFS via ODPT — Open Data Platform for Public Transportation, used for the Yamanote schedule, stop locations, and headway computation\nPassenger survey (JSON) — annual station-level boarding counts published via ODPT\nAnnual station boardings — daily average boardings per station published at jreast.co.jp, covering FY2023 and FY2024"
+  },
+  {
+    "objectID": "data.html#key-limitations",
+    "href": "data.html#key-limitations",
+    "title": "Data & Methods",
+    "section": "Key Limitations",
+    "text": "Key Limitations\n\nNo hourly ridership for Yamanote. JR East does not publish intraday ridership publicly. Frequency charts use scheduled departures as a supply-side proxy.\nDifferent reliability definitions. MTA measures on-time performance at the terminal. Japan’s standard measures departure to within seconds of schedule — these are not directly comparable metrics.\nBoarding counts only. JR East station data counts boardings (entries) only. MTA turnstile data counts both entries and exits separately.\nHeadways computed from scheduled GTFS, not observed operations. Actual headway variance during disruptions is not captured."
+  },
+  {
+    "objectID": "data.html#tools",
+    "href": "data.html#tools",
+    "title": "Data & Methods",
+    "section": "Tools",
+    "text": "Tools\nAnalysis and visualization were built entirely in R using tidyverse, plotly, leaflet, scales, and sf. The site is built with Quarto.\nFor the complete methodology, analytical decisions, and limitations discussion, see the full white paper."
   }
 ]

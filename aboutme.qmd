@@ -22,4 +22,3 @@ Data sourced from the [MTA Open Data Portal](https://www.mta.info/open-data), th
 Built with [R](https://www.r-project.org) and [Quarto](https://quarto.org).
 
 > *For full methodology and analysis, see the accompanying white paper.*
-
